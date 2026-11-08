@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,10 +17,8 @@ h2{font-size:18px;margin:0 0 15px}
 .metric{padding:16px;border-radius:11px;color:white;min-height:105px}
 .metric h3{font-size:12px;margin:0 0 13px}
 .metric strong{font-size:24px}
-.green{background:#078b59}.blue{background:#2878c7}
-.orange{background:#e58b25}.purple{background:#7654b8}
-.navy{background:#173e61}.teal{background:#168c91}
-.red{background:#c64d56}
+.green{background:#078b59}.blue{background:#2878c7}.orange{background:#e58b25}
+.purple{background:#7654b8}.navy{background:#173e61}.teal{background:#168c91}.red{background:#c64d56}
 .small{font-size:12px;color:#718096}
 input,textarea,button{font:inherit}
 input,textarea{width:100%;padding:12px;border:1px solid #d5deea;border-radius:8px;margin:8px 0}
@@ -32,9 +29,13 @@ table{width:100%;border-collapse:collapse;min-width:720px}
 th,td{text-align:left;padding:11px 9px;border-bottom:1px solid #e7edf3;font-size:12px;white-space:nowrap}
 th{background:#edf3f8}
 .status{padding:10px;border-radius:8px;background:#edf7f1;color:#12643f;font-size:13px;margin-top:10px}
-#status.error{background:#fff0ef;color:#a52b2b}
+.status.error{background:#fff0ef;color:#a52b2b}
 .toprow{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .datebox{max-width:190px}
+.hidden{display:none!important}
+.authbox{max-width:460px;margin:24px auto}
+.auth-actions{display:flex;gap:8px;flex-wrap:wrap}
+#accountBar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -43,17 +44,24 @@ th{background:#edf3f8}
 <p>Cluster Performance Management | November 2026</p>
 </header>
 <main>
+<section class="panel authbox" id="loginPanel">
+<h2>Sign in to your dashboard</h2>
+<p class="small">Use the email and password registered in Firebase Authentication.</p>
+<input id="loginEmail" type="email" autocomplete="username" placeholder="Email address">
+<input id="loginPassword" type="password" autocomplete="current-password" placeholder="Password">
+<button id="loginButton">Sign in</button>
+<div id="loginStatus" class="status">Please sign in to continue.</div>
+</section>
 
+<div id="appPanel" class="hidden">
+<div class="panel" id="accountBar">
+<div><strong id="signedInEmail"></strong><div class="small" id="roleLabel"></div></div>
+<button class="secondary" id="logoutButton">Sign out</button>
+</div>
 <div class="panel">
 <div class="toprow">
-<div>
-<h2>Cluster Overview</h2>
-<p class="small">Daily and month-to-date performance</p>
-</div>
-<div class="datebox">
-<label class="small">Select report date</label>
-<input type="date" id="reportDate" value="2026-11-08">
-</div>
+<div><h2>Cluster Overview</h2><p class="small">Daily and month-to-date performance</p></div>
+<div class="datebox"><label class="small">Select report date</label><input type="date" id="reportDate" value="2026-11-08"></div>
 </div>
 <div class="grid">
 <div class="metric green"><h3>Gross Add</h3><strong id="card-ga">0</strong></div>
@@ -68,56 +76,58 @@ th{background:#edf3f8}
 
 <div class="panel">
 <h2>Performance Summary</h2>
-<div class="tablewrap">
-<table>
-<thead><tr>
-<th>Indicator</th><th>Monthly Target</th><th>Daily Target</th>
-<th>MTD Target</th><th>MTD Actual</th><th>Daily Actual</th>
-<th>MTD Achievement</th><th>Daily Achievement</th>
-</tr></thead>
+<div class="tablewrap"><table>
+<thead><tr><th>Indicator</th><th>Monthly Target</th><th>Daily Target</th><th>MTD Target</th><th>MTD Actual</th><th>Daily Actual</th><th>MTD Achievement</th><th>Daily Achievement</th></tr></thead>
 <tbody id="summary"></tbody>
-</table>
-</div>
+</table></div>
 </div>
 
 <div class="panel">
 <h2>Gross Add – Site Performance</h2>
-<div class="tablewrap">
-<table>
-<thead><tr>
-<th>Site ID</th><th>Monthly Target</th><th>Daily Target</th>
-<th>MTD Actual</th><th>Daily Actual</th><th>MTD Achievement</th>
-</tr></thead>
+<div class="tablewrap"><table>
+<thead><tr><th>Site ID</th><th>Monthly Target</th><th>Daily Target</th><th>MTD Actual</th><th>Daily Actual</th><th>MTD Achievement</th></tr></thead>
 <tbody id="sites"></tbody>
-</table>
-</div>
+</table></div>
 </div>
 
-<div class="panel">
+<div class="panel" id="importPanel">
 <h2>Import Daily SMS Reports</h2>
-<p class="small">Paste all seven end-of-day SMS reports together. The report date and actual values will be extracted automatically.</p>
+<p class="small">Paste all seven end-of-day SMS reports together. The report date and actual values will be extracted automatically. Admin access is required to import or change records.</p>
 <textarea id="sms" rows="10" placeholder="Paste your seven SMS reports here..."></textarea>
-<button onclick="importReports()">Import Reports</button>
+<button id="importButton">Import Reports</button>
 <div id="status"></div>
 </div>
 
 <div class="panel">
-<div class="toprow">
-<h2>Imported Report History</h2>
-<button class="secondary" onclick="exportData()">Export CSV</button>
-</div>
-<div class="tablewrap">
-<table>
+<div class="toprow"><h2>Imported Report History</h2><button class="secondary" id="exportButton">Export CSV</button></div>
+<div class="tablewrap"><table>
 <thead><tr><th>Date</th><th>GA</th><th>Agents</th><th>Sites</th><th>M-PESA</th><th>Micro Merchants</th><th>Active Payment</th><th>Quality Payment</th></tr></thead>
 <tbody id="history"></tbody>
-</table>
+</table></div>
 </div>
-</div>
-
 <p class="small">Goro Meliyu Cluster | Four registered sites | Data begins November 1, 2026</p>
+</div>
 </main>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, doc, getDoc, getDocs, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDAhp8N0ncNopgtrjx7O6N87PmbS46duOs",
+  authDomain: "goro-meliyu-performance.firebaseapp.com",
+  projectId: "goro-meliyu-performance",
+  storageBucket: "goro-meliyu-performance.firebasestorage.app",
+  messagingSenderId: "71847944149",
+  appId: "1:71847944149:web:84b38f83d562164e2c275c",
+  measurementId: "G-D3MEBD42PR"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
 const targets={
  ga:{name:"Gross Add",monthly:720,daily:27},
  aa:{name:"Active Agents",monthly:312,daily:12},
@@ -127,25 +137,33 @@ const targets={
  ep:{name:"Active Payment Merchants",monthly:780,daily:30},
  qp:{name:"Quality Payment Merchants",monthly:416,daily:16}
 };
-
 const siteTargets={
  "411016":{monthly:208,daily:8},
  "411023":{monthly:78,daily:3},
  "411024":{monthly:78,daily:2},
  "411029":{monthly:338,daily:13}
 };
+let records={}, currentRole=null, currentUser=null;
 
-let records={};
-try{records=JSON.parse(localStorage.getItem("goroMeliyuReports")||"{}")}catch(e){records={}}
-
-function save(){
- localStorage.setItem("goroMeliyuReports",JSON.stringify(records));
-}
-
+const $=id=>document.getElementById(id);
 function number(v){return Number(String(v).replace(/,/g,""))||0}
 function fmt(v){return Number(v).toLocaleString("en-US")}
 function pct(a,b){return b>0?(a/b*100).toFixed(1)+"%":"N/A"}
+function showStatus(el,msg,error=false){el.className=error?"status error":"status";el.textContent=msg}
 
+async function loadCloudReports(){
+ records={};
+ const snap=await getDocs(collection(db,"reports"));
+ snap.forEach(d=>{
+  const data=d.data();
+  if(data.date && data.metrics) records[data.date]=data.metrics;
+ });
+ render();
+}
+async function saveCloudReport(date, metrics){
+ await setDoc(doc(db,"reports",date),{date,metrics,updatedAt:serverTimestamp()},{merge:true});
+ records[date]=metrics;
+}
 function dateFromText(text){
  let m=text.match(/\b(\d{4})-(\d{1,2})-(\d{1,2})\b/);
  if(m)return m[1]+"-"+m[2].padStart(2,"0")+"-"+m[3].padStart(2,"0");
@@ -155,7 +173,6 @@ function dateFromText(text){
  let mo=months[m[2].toUpperCase()]||m[2].padStart(2,"0");
  return m[3]+"-"+mo+"-"+m[1].padStart(2,"0");
 }
-
 function metricFromText(t){
  if(/\bGAs\b/i.test(t))return "ga";
  if(/\bAAs\b/i.test(t))return "aa";
@@ -166,100 +183,115 @@ function metricFromText(t){
  if(/Active Etswitch/i.test(t))return "ep";
  return null;
 }
-
-function importReports(){
- const raw=document.getElementById("sms").value.trim();
- const status=document.getElementById("status");
- if(!raw){status.className="status error";status.textContent="Please paste your SMS reports first.";return}
- let blocks=raw.split(/#BigData/i);
+async function importReports(){
+ const raw=$("sms").value.trim(), status=$("status");
+ if(!raw){showStatus(status,"Please paste your SMS reports first.",true);return}
+ const blocks=raw.split(/#BigData/i);
  let imported=0,errors=[];
- blocks.forEach(block=>{
-  if(!block.trim())return;
-  let key=metricFromText(block);
-  let date=dateFromText(block);
-  if(!key||!date){errors.push("A report could not be identified.");return}
-  let cluster=block.match(/^\s*Goro Meliyu:\s*([\d,]+)\s*-\s*([\d,]+)/mi);
-  if(!cluster){errors.push(targets[key].name+" has no cluster result.");return}
+ for(const block of blocks){
+  if(!block.trim())continue;
+  const key=metricFromText(block),date=dateFromText(block);
+  if(!key||!date){errors.push("A report could not be identified.");continue}
+  const cluster=block.match(/^\s*Goro Meliyu:\s*([\d,]+)\s*-\s*([\d,]+)/mi);
+  if(!cluster){errors.push(targets[key].name+" has no cluster result.");continue}
   if(!records[date])records[date]={};
-  records[date][key]={actual:number(cluster[1]),sites:{}};
-
-  let siteRegex=/^\s*(?:Goro Meliyu\s*-\s*)?(411\d{3})(?:\([^)]*\))?:\s*([\d,]+)/gmi;
+  const metric={actual:number(cluster[1]),sites:{}};
+  const siteRegex=/^\s*(?:Goro Meliyu\s*-\s*)?(411\d{3})(?:\([^)]*\))?:\s*([\d,]+)/gmi;
   let match;
   while((match=siteRegex.exec(block))!==null){
-   if(siteTargets[match[1]])records[date][key].sites[match[1]]=number(match[2]);
+   if(siteTargets[match[1]])metric.sites[match[1]]=number(match[2]);
   }
+  records[date][key]=metric;
   imported++;
- });
- save();
- document.getElementById("sms").value="";
- render();
- status.className=errors.length?"status error":"status";
- status.textContent=imported+" report section(s) imported. "+(errors.length?errors.join(" "):"Your records have been saved in this browser.");
-}
-
-function daysBetween(start,end){
- let dates=[];
- let d=new Date(start+"T12:00:00");
- let last=new Date(end+"T12:00:00");
- while(d<=last){
-  dates.push(d.toISOString().slice(0,10));
-  d.setDate(d.getDate()+1);
  }
+ try{
+  for(const [date,metrics] of Object.entries(records)){
+   if(blocks.some(b=>dateFromText(b)===date)) await saveCloudReport(date,metrics);
+  }
+  $("sms").value="";
+  render();
+  showStatus(status,imported+" report section(s) imported and saved to Firebase. "+(errors.length?errors.join(" "):""));
+ }catch(e){showStatus(status,"Could not save to Firebase: "+e.message,true)}
+}
+function daysBetween(start,end){
+ const dates=[];let d=new Date(start+"T12:00:00"),last=new Date(end+"T12:00:00");
+ while(d<=last){dates.push(d.toISOString().slice(0,10));d.setDate(d.getDate()+1)}
  return dates;
 }
-
 function render(){
- let selected=document.getElementById("reportDate").value;
- if(!selected)return;
- let dates=daysBetween("2026-11-01",selected);
- let current=records[selected]||{};
+ const selected=$("reportDate").value;if(!selected)return;
+ const dates=daysBetween("2026-11-01",selected),current=records[selected]||{};
  let summary="";
  Object.keys(targets).forEach(key=>{
-  let t=targets[key],mtd=0,daily=current[key]?.actual||0,mtdTarget=0;
+  const t=targets[key];let mtd=0,daily=current[key]?.actual||0,mtdTarget=0;
   dates.forEach(date=>{
    mtd+=records[date]?.[key]?.actual||0;
-   let day=new Date(date+"T12:00:00").getDay();
+   const day=new Date(date+"T12:00:00").getDay();
    if(key!=="ga"||day!==0)mtdTarget+=t.daily;
   });
-  let dailyTarget=(key==="ga"&&new Date(selected+"T12:00:00").getDay()===0)?"N/A":fmt(t.daily);
-  let dailyPct=dailyTarget==="N/A"?"N/A":pct(daily,t.daily);
+  const dailyTarget=(key==="ga"&&new Date(selected+"T12:00:00").getDay()===0)?"N/A":fmt(t.daily);
+  const dailyPct=dailyTarget==="N/A"?"N/A":pct(daily,t.daily);
   summary+=`<tr><td>${t.name}</td><td>${fmt(t.monthly)}</td><td>${dailyTarget}</td><td>${fmt(mtdTarget)}</td><td>${fmt(mtd)}</td><td>${fmt(daily)}</td><td>${pct(mtd,mtdTarget)}</td><td>${dailyPct}</td></tr>`;
-  document.getElementById("card-"+key).textContent=fmt(daily);
+  $("card-"+key).textContent=fmt(daily);
  });
- document.getElementById("summary").innerHTML=summary;
-
+ $("summary").innerHTML=summary;
  let siteHTML="";
  Object.keys(siteTargets).forEach(site=>{
-  let mtd=0;
-  dates.forEach(date=>{mtd+=records[date]?.ga?.sites?.[site]||0});
-  let daily=current.ga?.sites?.[site]||0;
+  let mtd=0;dates.forEach(date=>{mtd+=records[date]?.ga?.sites?.[site]||0});
+  const daily=current.ga?.sites?.[site]||0;
   siteHTML+=`<tr><td>${site}</td><td>${fmt(siteTargets[site].monthly)}</td><td>${fmt(siteTargets[site].daily)}</td><td>${fmt(mtd)}</td><td>${fmt(daily)}</td><td>${pct(mtd,siteTargets[site].monthly)}</td></tr>`;
  });
- document.getElementById("sites").innerHTML=siteHTML;
-
- let history=Object.keys(records).sort().reverse().map(date=>{
-  let r=records[date];
+ $("sites").innerHTML=siteHTML;
+ const history=Object.keys(records).sort().reverse().map(date=>{
+  const r=records[date];
   return `<tr><td>${date}</td>${["ga","aa","as","mv","am","ep","qp"].map(k=>`<td>${r[k]?fmt(r[k].actual):"—"}</td>`).join("")}</tr>`;
  }).join("");
- document.getElementById("history").innerHTML=history||'<tr><td colspan="8">No reports imported yet.</td></tr>';
+ $("history").innerHTML=history||'<tr><td colspan="8">No reports imported yet.</td></tr>';
 }
-
 function exportData(){
- let rows=[["Date","GA","Active Agents","Active Sites","M-PESA","Micro Merchants","Active Payment","Quality Payment"]];
+ const rows=[["Date","GA","Active Agents","Active Sites","M-PESA","Micro Merchants","Active Payment","Quality Payment"]];
  Object.keys(records).sort().forEach(date=>{
-  let r=records[date];
-  rows.push([date,...["ga","aa","as","mv","am","ep","qp"].map(k=>r[k]?.actual??"")]);
+  const r=records[date];rows.push([date,...["ga","aa","as","mv","am","ep","qp"].map(k=>r[k]?.actual??"")]);
  });
- let csv=rows.map(row=>row.join(",")).join("\n");
- let blob=new Blob([csv],{type:"text/csv"});
- let url=URL.createObjectURL(blob);
- let a=document.createElement("a");
- a.href=url;a.download="Goro-Meliyu-Performance.csv";a.click();
- URL.revokeObjectURL(url);
+ const csv=rows.map(row=>row.join(",")).join("\n"),blob=new Blob([csv],{type:"text/csv"});
+ const url=URL.createObjectURL(blob),a=document.createElement("a");
+ a.href=url;a.download="Goro-Meliyu-Performance.csv";a.click();URL.revokeObjectURL(url);
 }
+$("loginButton").addEventListener("click",async()=>{
+ const email=$("loginEmail").value.trim(),password=$("loginPassword").value;
+ if(!email||!password){showStatus($("loginStatus"),"Enter your email and password.",true);return}
+ try{await signInWithEmailAndPassword(auth,email,password)}
+ catch(e){showStatus($("loginStatus"),"Sign-in failed: "+e.message,true)}
+});
+$("logoutButton").addEventListener("click",()=>signOut(auth));
+$("importButton").addEventListener("click",importReports);
+$("exportButton").addEventListener("click",exportData);
+$("reportDate").addEventListener("change",render);
 
-document.getElementById("reportDate").addEventListener("change",render);
-render();
+onAuthStateChanged(auth,async user=>{
+ currentUser=user;currentRole=null;
+ if(!user){
+  $("loginPanel").classList.remove("hidden");$("appPanel").classList.add("hidden");
+  return;
+ }
+ try{
+  const userDoc=await getDoc(doc(db,"users",user.uid));
+  if(!userDoc.exists()||!["admin","viewer"].includes(userDoc.data().role)){
+   await signOut(auth);
+   showStatus($("loginStatus"),"This account is not authorized. Ask the dashboard admin to add your user profile.",true);
+   return;
+  }
+  currentRole=userDoc.data().role;
+  $("signedInEmail").textContent=user.email||"Signed in";
+  $("roleLabel").textContent=currentRole==="admin"?"Administrator":"View-only access";
+  $("importPanel").classList.toggle("hidden",currentRole!=="admin");
+  $("loginPanel").classList.add("hidden");$("appPanel").classList.remove("hidden");
+  await loadCloudReports();
+ }catch(e){
+  showStatus($("loginStatus"),"Could not load your account or reports: "+e.message,true);
+  await signOut(auth);
+ }
+});
 </script>
 </body>
 </html>
