@@ -1,0 +1,265 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Goro Meliyu Performance Portal</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f1f5f9;color:#17243a;font-family:Arial,sans-serif}
+header{background:#102c45;color:white;padding:23px 17px}
+header h1{font-size:22px;margin:0}
+header p{color:#c5d7e7;font-size:13px}
+main{max-width:1150px;margin:auto;padding:16px}
+.panel{background:white;border-radius:13px;padding:17px;margin-bottom:17px;box-shadow:0 3px 12px #102c4510}
+h2{font-size:18px;margin:0 0 15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:11px}
+.metric{padding:16px;border-radius:11px;color:white;min-height:105px}
+.metric h3{font-size:12px;margin:0 0 13px}
+.metric strong{font-size:24px}
+.green{background:#078b59}.blue{background:#2878c7}
+.orange{background:#e58b25}.purple{background:#7654b8}
+.navy{background:#173e61}.teal{background:#168c91}
+.red{background:#c64d56}
+.small{font-size:12px;color:#718096}
+input,textarea,button{font:inherit}
+input,textarea{width:100%;padding:12px;border:1px solid #d5deea;border-radius:8px;margin:8px 0}
+button{background:#078b59;color:white;border:0;border-radius:8px;padding:12px 17px;font-weight:bold;cursor:pointer}
+button.secondary{background:#173e61}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:720px}
+th,td{text-align:left;padding:11px 9px;border-bottom:1px solid #e7edf3;font-size:12px;white-space:nowrap}
+th{background:#edf3f8}
+.status{padding:10px;border-radius:8px;background:#edf7f1;color:#12643f;font-size:13px;margin-top:10px}
+#status.error{background:#fff0ef;color:#a52b2b}
+.toprow{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.datebox{max-width:190px}
+</style>
+</head>
+<body>
+<header>
+<h1>Goro Meliyu Performance Portal</h1>
+<p>Cluster Performance Management | November 2026</p>
+</header>
+<main>
+
+<div class="panel">
+<div class="toprow">
+<div>
+<h2>Cluster Overview</h2>
+<p class="small">Daily and month-to-date performance</p>
+</div>
+<div class="datebox">
+<label class="small">Select report date</label>
+<input type="date" id="reportDate" value="2026-11-08">
+</div>
+</div>
+<div class="grid">
+<div class="metric green"><h3>Gross Add</h3><strong id="card-ga">0</strong></div>
+<div class="metric blue"><h3>Active Agents</h3><strong id="card-aa">0</strong></div>
+<div class="metric orange"><h3>Active Sites</h3><strong id="card-as">0</strong></div>
+<div class="metric purple"><h3>M-PESA Value</h3><strong id="card-mv">0</strong></div>
+<div class="metric teal"><h3>Active Micro Merchants</h3><strong id="card-am">0</strong></div>
+<div class="metric navy"><h3>Active Payment Merchants</h3><strong id="card-ep">0</strong></div>
+<div class="metric red"><h3>Quality Payment Merchants</h3><strong id="card-qp">0</strong></div>
+</div>
+</div>
+
+<div class="panel">
+<h2>Performance Summary</h2>
+<div class="tablewrap">
+<table>
+<thead><tr>
+<th>Indicator</th><th>Monthly Target</th><th>Daily Target</th>
+<th>MTD Target</th><th>MTD Actual</th><th>Daily Actual</th>
+<th>MTD Achievement</th><th>Daily Achievement</th>
+</tr></thead>
+<tbody id="summary"></tbody>
+</table>
+</div>
+</div>
+
+<div class="panel">
+<h2>Gross Add – Site Performance</h2>
+<div class="tablewrap">
+<table>
+<thead><tr>
+<th>Site ID</th><th>Monthly Target</th><th>Daily Target</th>
+<th>MTD Actual</th><th>Daily Actual</th><th>MTD Achievement</th>
+</tr></thead>
+<tbody id="sites"></tbody>
+</table>
+</div>
+</div>
+
+<div class="panel">
+<h2>Import Daily SMS Reports</h2>
+<p class="small">Paste all seven end-of-day SMS reports together. The report date and actual values will be extracted automatically.</p>
+<textarea id="sms" rows="10" placeholder="Paste your seven SMS reports here..."></textarea>
+<button onclick="importReports()">Import Reports</button>
+<div id="status"></div>
+</div>
+
+<div class="panel">
+<div class="toprow">
+<h2>Imported Report History</h2>
+<button class="secondary" onclick="exportData()">Export CSV</button>
+</div>
+<div class="tablewrap">
+<table>
+<thead><tr><th>Date</th><th>GA</th><th>Agents</th><th>Sites</th><th>M-PESA</th><th>Micro Merchants</th><th>Active Payment</th><th>Quality Payment</th></tr></thead>
+<tbody id="history"></tbody>
+</table>
+</div>
+</div>
+
+<p class="small">Goro Meliyu Cluster | Four registered sites | Data begins November 1, 2026</p>
+</main>
+
+<script>
+const targets={
+ ga:{name:"Gross Add",monthly:720,daily:27},
+ aa:{name:"Active Agents",monthly:312,daily:12},
+ as:{name:"Active Sites",monthly:104,daily:4},
+ mv:{name:"M-PESA Value",monthly:843453,daily:28115},
+ am:{name:"Active Micro Merchants",monthly:2080,daily:80},
+ ep:{name:"Active Payment Merchants",monthly:780,daily:30},
+ qp:{name:"Quality Payment Merchants",monthly:416,daily:16}
+};
+
+const siteTargets={
+ "411016":{monthly:208,daily:8},
+ "411023":{monthly:78,daily:3},
+ "411024":{monthly:78,daily:2},
+ "411029":{monthly:338,daily:13}
+};
+
+let records={};
+try{records=JSON.parse(localStorage.getItem("goroMeliyuReports")||"{}")}catch(e){records={}}
+
+function save(){
+ localStorage.setItem("goroMeliyuReports",JSON.stringify(records));
+}
+
+function number(v){return Number(String(v).replace(/,/g,""))||0}
+function fmt(v){return Number(v).toLocaleString("en-US")}
+function pct(a,b){return b>0?(a/b*100).toFixed(1)+"%":"N/A"}
+
+function dateFromText(text){
+ let m=text.match(/\b(\d{4})-(\d{1,2})-(\d{1,2})\b/);
+ if(m)return m[1]+"-"+m[2].padStart(2,"0")+"-"+m[3].padStart(2,"0");
+ m=text.match(/\b(\d{1,2})[-/]([A-Z]{3}|\d{1,2})[-/](\d{4})\b/i);
+ if(!m)return null;
+ let months={JAN:"01",FEB:"02",MAR:"03",APR:"04",MAY:"05",JUN:"06",JUL:"07",AUG:"08",SEP:"09",OCT:"10",NOV:"11",DEC:"12"};
+ let mo=months[m[2].toUpperCase()]||m[2].padStart(2,"0");
+ return m[3]+"-"+mo+"-"+m[1].padStart(2,"0");
+}
+
+function metricFromText(t){
+ if(/\bGAs\b/i.test(t))return "ga";
+ if(/\bAAs\b/i.test(t))return "aa";
+ if(/\bASs\b/i.test(t))return "as";
+ if(/MV-T\s*vs/i.test(t))return "mv";
+ if(/AM-DT\s*vs/i.test(t))return "am";
+ if(/Quality Etswitch/i.test(t))return "qp";
+ if(/Active Etswitch/i.test(t))return "ep";
+ return null;
+}
+
+function importReports(){
+ const raw=document.getElementById("sms").value.trim();
+ const status=document.getElementById("status");
+ if(!raw){status.className="status error";status.textContent="Please paste your SMS reports first.";return}
+ let blocks=raw.split(/#BigData/i);
+ let imported=0,errors=[];
+ blocks.forEach(block=>{
+  if(!block.trim())return;
+  let key=metricFromText(block);
+  let date=dateFromText(block);
+  if(!key||!date){errors.push("A report could not be identified.");return}
+  let cluster=block.match(/^\s*Goro Meliyu:\s*([\d,]+)\s*-\s*([\d,]+)/mi);
+  if(!cluster){errors.push(targets[key].name+" has no cluster result.");return}
+  if(!records[date])records[date]={};
+  records[date][key]={actual:number(cluster[1]),sites:{}};
+
+  let siteRegex=/^\s*(?:Goro Meliyu\s*-\s*)?(411\d{3})(?:\([^)]*\))?:\s*([\d,]+)/gmi;
+  let match;
+  while((match=siteRegex.exec(block))!==null){
+   if(siteTargets[match[1]])records[date][key].sites[match[1]]=number(match[2]);
+  }
+  imported++;
+ });
+ save();
+ document.getElementById("sms").value="";
+ render();
+ status.className=errors.length?"status error":"status";
+ status.textContent=imported+" report section(s) imported. "+(errors.length?errors.join(" "):"Your records have been saved in this browser.");
+}
+
+function daysBetween(start,end){
+ let dates=[];
+ let d=new Date(start+"T12:00:00");
+ let last=new Date(end+"T12:00:00");
+ while(d<=last){
+  dates.push(d.toISOString().slice(0,10));
+  d.setDate(d.getDate()+1);
+ }
+ return dates;
+}
+
+function render(){
+ let selected=document.getElementById("reportDate").value;
+ if(!selected)return;
+ let dates=daysBetween("2026-11-01",selected);
+ let current=records[selected]||{};
+ let summary="";
+ Object.keys(targets).forEach(key=>{
+  let t=targets[key],mtd=0,daily=current[key]?.actual||0,mtdTarget=0;
+  dates.forEach(date=>{
+   mtd+=records[date]?.[key]?.actual||0;
+   let day=new Date(date+"T12:00:00").getDay();
+   if(key!=="ga"||day!==0)mtdTarget+=t.daily;
+  });
+  let dailyTarget=(key==="ga"&&new Date(selected+"T12:00:00").getDay()===0)?"N/A":fmt(t.daily);
+  let dailyPct=dailyTarget==="N/A"?"N/A":pct(daily,t.daily);
+  summary+=`<tr><td>${t.name}</td><td>${fmt(t.monthly)}</td><td>${dailyTarget}</td><td>${fmt(mtdTarget)}</td><td>${fmt(mtd)}</td><td>${fmt(daily)}</td><td>${pct(mtd,mtdTarget)}</td><td>${dailyPct}</td></tr>`;
+  document.getElementById("card-"+key).textContent=fmt(daily);
+ });
+ document.getElementById("summary").innerHTML=summary;
+
+ let siteHTML="";
+ Object.keys(siteTargets).forEach(site=>{
+  let mtd=0;
+  dates.forEach(date=>{mtd+=records[date]?.ga?.sites?.[site]||0});
+  let daily=current.ga?.sites?.[site]||0;
+  siteHTML+=`<tr><td>${site}</td><td>${fmt(siteTargets[site].monthly)}</td><td>${fmt(siteTargets[site].daily)}</td><td>${fmt(mtd)}</td><td>${fmt(daily)}</td><td>${pct(mtd,siteTargets[site].monthly)}</td></tr>`;
+ });
+ document.getElementById("sites").innerHTML=siteHTML;
+
+ let history=Object.keys(records).sort().reverse().map(date=>{
+  let r=records[date];
+  return `<tr><td>${date}</td>${["ga","aa","as","mv","am","ep","qp"].map(k=>`<td>${r[k]?fmt(r[k].actual):"—"}</td>`).join("")}</tr>`;
+ }).join("");
+ document.getElementById("history").innerHTML=history||'<tr><td colspan="8">No reports imported yet.</td></tr>';
+}
+
+function exportData(){
+ let rows=[["Date","GA","Active Agents","Active Sites","M-PESA","Micro Merchants","Active Payment","Quality Payment"]];
+ Object.keys(records).sort().forEach(date=>{
+  let r=records[date];
+  rows.push([date,...["ga","aa","as","mv","am","ep","qp"].map(k=>r[k]?.actual??"")]);
+ });
+ let csv=rows.map(row=>row.join(",")).join("\n");
+ let blob=new Blob([csv],{type:"text/csv"});
+ let url=URL.createObjectURL(blob);
+ let a=document.createElement("a");
+ a.href=url;a.download="Goro-Meliyu-Performance.csv";a.click();
+ URL.revokeObjectURL(url);
+}
+
+document.getElementById("reportDate").addEventListener("change",render);
+render();
+</script>
+</body>
+</html>
